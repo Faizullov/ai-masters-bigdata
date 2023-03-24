@@ -1,4 +1,4 @@
-ADD FILE projects/2/2.joblib;
+ADD FILE 2.joblib;
 ADD FILE projects/2/model.py;
 ADD FILE projects/2/predict.py;
 
