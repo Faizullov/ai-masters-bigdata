@@ -73,8 +73,10 @@ def shortest_path(v_from, v_to, dataset_path=None):
 
     return d
 
-d = shortest_path(sys.argv[1], sys.argv[2], f"{sys.argv[3]}")
-
+print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+print(sys.argv[1])
+print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
 # tmp_str = d.to_string()
 print(f"{d}")
 df = spark.createDataFrame(eval(f"{d}"))
