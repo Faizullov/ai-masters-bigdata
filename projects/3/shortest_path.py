@@ -20,7 +20,7 @@ graph_schema = StructType([
 dist_schema = StructType([
     StructField("vertex", IntegerType(), False),
     StructField("distance", IntegerType(), False),
-    StructField("prev", StringType(), False),
+    StructField("prev", StringType())
 ])
 
 def shortest_path(v_from, v_to, dataset_path=None):
