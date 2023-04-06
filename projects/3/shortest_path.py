@@ -4,7 +4,6 @@ import sys
 from pyspark.sql.types import StructType, StructField, IntegerType
 from pyspark.sql.functions import *
 
-from pyspark.sql import SparkSession
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import split, expr
 from pyspark.sql.functions import concat, lit
@@ -43,7 +42,7 @@ def shortest_path(v_from, v_to, dataset_path=None):
                               (concat(distances.prev, lit(f"{to_lit}"), distances.vertex).alias("prev"))) 
                      ).cache()
         
-
+        print("/////////////////////////////////////////////////////////////////")
         new_distances = (distances
                          .join(candidates, on="vertex", how="full_outer")
                          .select("vertex", candidates.prev.alias("prev"),
@@ -93,7 +92,7 @@ for i in range(ln):
     df = df.withColumn('prev_' + str(i), expr('prev[' + str(i) + ']'))
 
 df = df.drop("prev")
-df.write.mode('overwrite').option("header", "false").csv("/user/Faizullov/Faizullov_hw3_output")
+df.write.mode('overwrite').option("header", "false").csv(sys.argv[4])
 df.show()
 
 spark.stop()
