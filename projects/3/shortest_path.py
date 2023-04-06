@@ -4,9 +4,11 @@ import sys
 from pyspark.sql.types import StructType, StructField, IntegerType
 from pyspark.sql.functions import *
 
+from pyspark.sql import SparkSession
 from pyspark.sql import SparkSession, Row
 from pyspark.sql.functions import split, expr
 from pyspark.sql.functions import concat, lit
+from pyspark import SparkContext, SparkConf
 
 spark = SparkSession.builder.enableHiveSupport().master("local[2]").getOrCreate()
 
@@ -26,7 +28,7 @@ def shortest_path(v_from, v_to, dataset_path=None):
     edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
     edges.cache()
 
-    distances = spark.createDataFrame([(v_from, 0, " ")], dist_schema)
+    distances = spark.createDataFrame([(v_from, 0, "")], dist_schema)
     d = 0
     
     cnt = False
