@@ -27,7 +27,8 @@ def shortest_path(v_from, v_to, dataset_path=None):
 
     edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
     edges.cache()
-
+    print("/////////////////////////////////////////////////////////////////")
+    print(v_from)
     distances = spark.createDataFrame([(v_from, 0, "")], dist_schema)
     d = 0
     
@@ -44,7 +45,6 @@ def shortest_path(v_from, v_to, dataset_path=None):
                               (concat(distances.prev, lit(f"{to_lit}"), distances.vertex).alias("prev"))) 
                      ).cache()
         
-        print("/////////////////////////////////////////////////////////////////")
         new_distances = (distances
                          .join(candidates, on="vertex", how="full_outer")
                          .select("vertex", candidates.prev.alias("prev"),
