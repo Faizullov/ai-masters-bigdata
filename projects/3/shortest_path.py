@@ -88,7 +88,7 @@ for i in range(ln):
     df = df.withColumn('prev_' + str(i), expr('prev[' + str(i) + ']'))
 
 df = df.drop("prev")
-df.write.mode('overwrite').option("header", "false").csv(f"{sys.argv[4]}")
+df.write.mode('overwrite').option("header", "false").csv("/user/Faizullov/Faizullov_hw3_output")
 df.show()
 
 spark.stop()
