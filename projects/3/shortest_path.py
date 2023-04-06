@@ -5,6 +5,10 @@ from pyspark.sql.types import StructType, StructField, IntegerType
 from pyspark.sql.functions import *
 
 from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Row
+from pyspark.sql.functions import split, expr
+from pyspark.sql.functions import concat, lit
+
 spark = SparkSession.builder.enableHiveSupport().master("local[2]").getOrCreate()
 
 graph_schema = StructType([
@@ -64,11 +68,22 @@ def shortest_path(v_from, v_to, dataset_path=None):
                  ).count()
         
         if  target > 0:
-            return tmp.select("prev").collect()[0].prev + f",{v_to}"
+            return tmp.select("prev").collect()
             break 
 
     return d
 
 d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
 
-d.write.format('csv').save(sys.argv[4])
+df = spark.createDataFrame(eval(f"{d}"))
+ln = len(d[0].prev.split(',')) + 1
+df = df.withColumn('prev', concat(df.prev, lit(f",{sys.argv[2]}")))
+df = df.select(df.prev).alias('prev')
+df = df.select(split(df.prev, ',').alias('prev'))
+for i in range(ln):
+    df = df.withColumn('prev_' + str(i), expr('prev[' + str(i) + ']'))
+
+df = df.drop("prev")
+df.write.mode('overwrite').option("header", "false").csv(f'{sys.argv[4]}')
+
+spark.stop()
