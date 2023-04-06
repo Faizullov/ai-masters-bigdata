@@ -76,8 +76,10 @@ def shortest_path(v_from, v_to, dataset_path=None):
 d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
 
 df = spark.createDataFrame(eval(f"{d}"))
+df = df.withColumn('prev', concat(df.prev, lit(",34")))
+df = df.dropDuplicates()
 ln = len(d[0].prev.split(',')) + 1
-df = df.withColumn('prev', concat(df.prev, lit(f",{sys.argv[2]}")))
+
 df = df.select(df.prev).alias('prev')
 df = df.select(split(df.prev, ',').alias('prev'))
 for i in range(ln):
@@ -85,5 +87,4 @@ for i in range(ln):
 
 df = df.drop("prev")
 df.write.mode('overwrite').option("header", "false").csv('Faizullov_hw3_output')
-
-spark.stop()
+df.show()
