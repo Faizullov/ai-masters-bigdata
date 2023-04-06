@@ -75,6 +75,9 @@ def shortest_path(v_from, v_to, dataset_path=None):
 
 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 print(sys.argv[1])
+print(sys.argv[2])
+print(sys.argv[3])
+print(sys.argv[4])
 print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
 # tmp_str = d.to_string()
