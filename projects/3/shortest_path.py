@@ -86,5 +86,5 @@ for i in range(ln):
     df = df.withColumn('prev_' + str(i), expr('prev[' + str(i) + ']'))
 
 df = df.drop("prev")
-df.write.mode('overwrite').option("header", "false").csv('Faizullov_hw3_output')
+df.write.mode('overwrite').option("header", "false").csv('hw3_output')
 df.show()
