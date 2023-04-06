@@ -73,7 +73,7 @@ def shortest_path(v_from, v_to, dataset_path=None):
 
     return d
 
-d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
+d = shortest_path(sys.argv[1], sys.argv[2], f"{sys.argv[3]}")
 
 # tmp_str = d.to_string()
 print(f"{d}")
