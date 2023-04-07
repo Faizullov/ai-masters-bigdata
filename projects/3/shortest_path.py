@@ -31,14 +31,14 @@ graph_schema = StructType([
 dist_schema = StructType([
     StructField("vertex", IntegerType(), False),
     StructField("distance", IntegerType(), False),
-    StructField("prev", StringType()),
+    StructField("prev", StringType(), False),
 ])
 
 def shortest_path(v_from, v_to, dataset_path=None):
 
     edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
     edges.cache()
-    distances = spark.createDataFrame([(v_from, 0, "a")], dist_schema)
+    distances = spark.createDataFrame([(v_from, 0, " ")], dist_schema)
     d = 0
     
     cnt = False
