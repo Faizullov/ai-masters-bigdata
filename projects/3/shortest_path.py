@@ -1,3 +1,4 @@
+# preparations
 import os
 import sys
 
@@ -11,98 +12,109 @@ PYSPARK_HOME = os.path.join(SPARK_HOME, "python/lib")
 sys.path.insert(0, os.path.join(PYSPARK_HOME, "py4j-0.10.9.3-src.zip"))
 sys.path.insert(0, os.path.join(PYSPARK_HOME, "pyspark.zip"))
 
-from pyspark.sql.types import StructType, StructField, IntegerType
-from pyspark.sql.functions import *
+# make session
 
+from pyspark import SparkConf
 from pyspark.sql import SparkSession
-from pyspark.sql import SparkSession, Row
-from pyspark.sql.functions import split, expr
-from pyspark.sql.functions import concat, lit
-from pyspark import SparkContext, SparkConf
 
-spark = SparkSession.builder.enableHiveSupport().master("local[2]").getOrCreate()
+conf = SparkConf()
+spark = SparkSession.builder.config(conf=conf).appName("Pagerank").getOrCreate()
 
-graph_schema = StructType([
-    StructField("user_id", IntegerType(), False),
-    StructField("follower_id", IntegerType(), False)
-])
+from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType
 
-dist_schema = StructType([
-    StructField("vertex", IntegerType(), False),
-    StructField("distance", IntegerType(), False),
-    StructField("prev", StringType()),
-])
+small = '/datasets/twitter/twitter_sample_small.tsv'
+sample = '/datasets/twitter/twitter_sample.tsv'
+full = '/datasets/twitter/twitter.tsv'
 
-def shortest_path(v_from, v_to, dataset_path=None):
+# problem to be solved
+v_from = int(sys.argv[1])
+v_to = int(sys.argv[2])
+dataset_path = sys.argv[3]
 
-    edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
-    edges.cache()
-    distances = spark.createDataFrame([(v_from, 0, "a")], dist_schema)
-    d = 0
+# load source dataset
+graph = spark.read.csv(
+    dataset_path, sep="\t", schema=
+        StructType([
+            StructField("user_id", IntegerType(), False),
+            StructField("follower_id", IntegerType(), False)
+        ])
+)       
+graph.cache()    # spark optimization trick
+
+# data collected by BFS
+collected_data = spark.createDataFrame(
+    [(v_from, 0, [])], schema=
+        StructType([
+            StructField("vertex", IntegerType(), False),
+            StructField("distance", IntegerType(), False),
+            StructField("path", ArrayType(IntegerType()), False),
+        ])
+)
+
+import pyspark.sql.functions as F
+
+
+# value of current distance
+# tip: BFS constructs tree of elongating paths
+d = 0
+
+# BFS algorithm
+while True:
+    # update forefront; it stores nodes connected to `collected_data` 
+    # user's follower - distance - user
+    forefront = (
+        collected_data
+            .join(graph, on=(collected_data.vertex==graph.follower_id))
+            .cache()
+    ) 
     
-    cnt = False
-    while True:
-        
-        to_lit = ","
-        if not cnt:
-            to_lit = ""
-            cnt = True
-        candidates = (distances
-                      .join(edges.alias("edges"), distances.vertex==edges.follower_id)
-                      .select(col("edges.user_id").alias("vertex"), (distances.distance + 1).alias("distance"), \
-                              (concat(distances.prev, lit(f"{to_lit}"), distances.vertex).alias("prev"))) 
-                     ).cache()
-        
-        new_distances = (distances
-                         .join(candidates, on="vertex", how="full_outer")
-                         .select("vertex", candidates.prev.alias("prev"),
-                                 when(
-                                     distances.distance.isNotNull(), distances.distance
-                                 ).otherwise(
-                                     candidates.distance
-                                 ).alias("distance"))
-                        ).persist()
-        
-        tmp = new_distances.where(new_distances.distance==d+1)
-        count = tmp.count()
-        if count > 0:
-            d += 1            
-            distances = candidates
-        else:
-            return "CAN'T FIND"
-            break  
-        
-        target = (new_distances
-                  .where(new_distances.vertex == v_to)
-                 ).count()
-        
-        if  target > 0:
-            return tmp.select("prev").collect()
-            break 
+     # assign distance based on 
+    forefront = (
+        forefront.select(
+            forefront['user_id'].alias("vertex"),
+            (collected_data['distance'] + 1).alias("distance"),
+            F.concat(forefront["path"], F.array(forefront["vertex"])).alias('path')
+        )
+    )
+    # add `forefront` to `collected_data` (to count number of newly added records later)
+    with_newly_added = (
+        collected_data
+            .join(forefront, on="vertex", how="full_outer") # vertex_id - distance
+            .select(
+                "vertex",
+                F.when(collected_data.distance.isNotNull(), collected_data.distance)
+                    .otherwise(forefront.distance) # `null` means it's a new record, we need to add it
+                    .alias("distance"),
+            )
+            .persist() # spark optimization trick
+    )
 
-    return d
+    # number of newly added records
+    count = with_newly_added.where(with_newly_added.distance == d + 1).count()
 
-print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-print(sys.argv[1])
-print(sys.argv[2])
-print(sys.argv[3])
-print(sys.argv[4])
-print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
-# tmp_str = d.to_string()
-print(f"{d}")
-df = spark.createDataFrame(eval(f"{d}"))
-df = df.withColumn('prev', concat(df.prev, lit(f",{sys.argv[2]}")))
-df = df.dropDuplicates()
-ln = len(d[0].prev.split(',')) + 1
-print(ln)
-df = df.select(df.prev).alias('prev')
-df = df.select(split(df.prev, ',').alias('prev'))
-for i in range(ln):
-    df = df.withColumn('prev_' + str(i), expr('prev[' + str(i) + ']'))
+    if count == 0:
+        # BFS is exhausted and target node wasn't found
+        break  
 
-df = df.drop("prev")
-df.write.mode('overwrite').option("header", "false").csv(sys.argv[4])
-df.show()
+    d += 1            
+    collected_data = forefront
 
-spark.stop()
+    # number of found nodes that match the target node
+    target = with_newly_added.where(with_newly_added.vertex == v_to).count()
+
+    if target > 0:
+        # target node was found => terminate the search
+        print('steps made:', d)
+        break
+
+# save answer
+ans = (
+    collected_data
+        .where(collected_data.vertex == v_to)
+        .withColumn('last', F.lit(v_to))
+        .select(
+            F.concat_ws(',', F.concat("path", F.array("last"))).alias('path')
+        )
+)
+
+ans.select('path').write.text(sys.argv[4])
