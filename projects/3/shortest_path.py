@@ -20,7 +20,6 @@ from pyspark.sql.functions import split, expr
 from pyspark.sql.functions import concat, lit
 from pyspark import SparkContext, SparkConf
 
-
 conf = SparkConf()
 spark = SparkSession.builder.config(conf=conf).appName("Pagerank").getOrCreate()
 
@@ -32,17 +31,19 @@ graph_schema = StructType([
 dist_schema = StructType([
     StructField("vertex", IntegerType(), False),
     StructField("distance", IntegerType(), False),
-    StructField("prev", ArrayType(IntegerType()), False)
+    StructField("prev", StringType(), False),
 ])
-
-import pyspark.sql.functions as F
 
 def shortest_path(v_from, v_to, dataset_path=None):
 
     edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
     edges.cache()
-
-    distances = spark.createDataFrame([(v_from, 0, [])], dist_schema)
+    distances = spark.createDataFrame([(v_from, 0, "")], schema=
+        StructType([
+            StructField("vertex", IntegerType(), False),
+            StructField("distance", IntegerType(), False),
+            StructField("prev", StringType(), False),
+        ]))
     d = 0
     
     cnt = False
@@ -55,10 +56,9 @@ def shortest_path(v_from, v_to, dataset_path=None):
         candidates = (distances
                       .join(edges.alias("edges"), distances.vertex==edges.follower_id)
                       .select(col("edges.user_id").alias("vertex"), (distances.distance + 1).alias("distance"), \
-                              (concat(distances.prev, array(distances.vertex)).alias("prev"))) 
+                              (concat(distances.prev, lit(f"{to_lit}"), distances.vertex).alias("prev"))) 
                      ).cache()
         
-
         new_distances = (distances
                          .join(candidates, on="vertex", how="full_outer")
                          .select("vertex", candidates.prev.alias("prev"),
@@ -76,7 +76,6 @@ def shortest_path(v_from, v_to, dataset_path=None):
             distances = candidates
         else:
             return "CAN'T FIND"
-            break  
         
         target = (new_distances
                   .where(new_distances.vertex == v_to)
@@ -84,9 +83,6 @@ def shortest_path(v_from, v_to, dataset_path=None):
         
         if  target > 0:
             return tmp.select("prev").collect()
-            break 
-
-    return d
 
 
 d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
