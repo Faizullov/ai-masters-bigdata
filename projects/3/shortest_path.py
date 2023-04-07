@@ -11,7 +11,7 @@ PYSPARK_HOME = os.path.join(SPARK_HOME, "python/lib")
 sys.path.insert(0, os.path.join(PYSPARK_HOME, "py4j-0.10.9.3-src.zip"))
 sys.path.insert(0, os.path.join(PYSPARK_HOME, "pyspark.zip"))
 
-from pyspark.sql.types import StructType, StructField, IntegerType
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 from pyspark.sql.functions import *
 
 from pyspark.sql import SparkSession
@@ -38,12 +38,7 @@ def shortest_path(v_from, v_to, dataset_path=None):
 
     edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
     edges.cache()
-    distances = spark.createDataFrame([(v_from, 0, "")], schema=
-        StructType([
-            StructField("vertex", IntegerType(), False),
-            StructField("distance", IntegerType(), False),
-            StructField("prev", StringType(), False),
-        ]))
+    distances = spark.createDataFrame([(v_from, 0, "")], dist_schema)
     d = 0
     
     cnt = False
