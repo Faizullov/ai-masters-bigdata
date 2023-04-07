@@ -20,6 +20,7 @@ from pyspark.sql.functions import split, expr
 from pyspark.sql.functions import concat, lit
 from pyspark import SparkContext, SparkConf
 
+
 conf = SparkConf()
 spark = SparkSession.builder.config(conf=conf).appName("Pagerank").getOrCreate()
 
@@ -31,14 +32,17 @@ graph_schema = StructType([
 dist_schema = StructType([
     StructField("vertex", IntegerType(), False),
     StructField("distance", IntegerType(), False),
-    StructField("prev", StringType(), False),
+    StructField("prev", ArrayType(IntegerType()), False)
 ])
+
+import pyspark.sql.functions as F
 
 def shortest_path(v_from, v_to, dataset_path=None):
 
     edges = spark.read.csv(dataset_path, sep="\t", schema=graph_schema) 
     edges.cache()
-    distances = spark.createDataFrame([(v_from, 0, " ")], dist_schema)
+
+    distances = spark.createDataFrame([(v_from, 0, [])], dist_schema)
     d = 0
     
     cnt = False
@@ -51,9 +55,10 @@ def shortest_path(v_from, v_to, dataset_path=None):
         candidates = (distances
                       .join(edges.alias("edges"), distances.vertex==edges.follower_id)
                       .select(col("edges.user_id").alias("vertex"), (distances.distance + 1).alias("distance"), \
-                              (concat(distances.prev, lit(f"{to_lit}"), distances.vertex).alias("prev"))) 
+                              (concat(distances.prev, array(distances.vertex)).alias("prev"))) 
                      ).cache()
         
+
         new_distances = (distances
                          .join(candidates, on="vertex", how="full_outer")
                          .select("vertex", candidates.prev.alias("prev"),
@@ -85,13 +90,10 @@ def shortest_path(v_from, v_to, dataset_path=None):
 
 
 d = shortest_path(sys.argv[1], sys.argv[2], sys.argv[3])
-# tmp_str = d.to_string()
-print(f"{d}")
 df = spark.createDataFrame(eval(f"{d}"))
 df = df.withColumn('prev', concat(df.prev, lit(f",{sys.argv[2]}")))
 df = df.dropDuplicates()
 ln = len(d[0].prev.split(',')) + 1
-print(ln)
 df = df.select(df.prev).alias('prev')
 df = df.select(split(df.prev, ',').alias('prev'))
 for i in range(ln):
