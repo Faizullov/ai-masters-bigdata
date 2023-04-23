@@ -14,7 +14,6 @@ import logging
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from joblib import dump
 
 #
 # Import model definition
@@ -107,15 +106,15 @@ X_train, X_test, y_train, y_test = train_test_split(
 #
 mlflow.sklearn.autolog()
 
-with mlflow.start_run():
+with mlflow.start_run(run_name="I_LOVE_BIGDATA"):
     # with mlflow.start_run(run_name="I LOVE BIGDATA"):
     model.fit(X_train, y_train)
 
     model_score = log_loss(y_test, model.predict(X_test))
 
-    logging.info(f"model score: {model_score:.3f}")
+    # logging.info(f"model score: {model_score:.3f}")
 
-    mlflow.log_param("param2", sys.argv[2])
+    mlflow.log_param("model_param1", sys.argv[2])
     mlflow.sklearn.log_model(model, artifact_path="models")
-    mlflow.log_metric("log loss", model_score)
+    mlflow.log_metric("log_loss", model_score)
 

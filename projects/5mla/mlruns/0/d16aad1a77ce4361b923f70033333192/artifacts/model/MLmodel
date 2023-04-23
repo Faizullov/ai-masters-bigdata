@@ -1,0 +1,37 @@
+artifact_path: model
+flavors:
+  python_function:
+    env: conda.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.7.16
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.0.2
+mlflow_version: 1.30.0
+model_uuid: f6f92f95bd8541b5923b40c909cf6d43
+run_id: d16aad1a77ce4361b923f70033333192
+signature:
+  inputs: '[{"name": "id", "type": "long"}, {"name": "if1", "type": "double"}, {"name":
+    "if2", "type": "double"}, {"name": "if3", "type": "double"}, {"name": "if4", "type":
+    "double"}, {"name": "if5", "type": "double"}, {"name": "if6", "type": "double"},
+    {"name": "if7", "type": "double"}, {"name": "if8", "type": "long"}, {"name": "if9",
+    "type": "long"}, {"name": "if10", "type": "double"}, {"name": "if11", "type":
+    "double"}, {"name": "if12", "type": "double"}, {"name": "if13", "type": "double"},
+    {"name": "cf1", "type": "string"}, {"name": "cf2", "type": "string"}, {"name":
+    "cf3", "type": "string"}, {"name": "cf4", "type": "string"}, {"name": "cf5", "type":
+    "string"}, {"name": "cf6", "type": "string"}, {"name": "cf7", "type": "string"},
+    {"name": "cf8", "type": "string"}, {"name": "cf9", "type": "string"}, {"name":
+    "cf10", "type": "string"}, {"name": "cf11", "type": "string"}, {"name": "cf12",
+    "type": "string"}, {"name": "cf13", "type": "string"}, {"name": "cf14", "type":
+    "string"}, {"name": "cf15", "type": "string"}, {"name": "cf16", "type": "string"},
+    {"name": "cf17", "type": "string"}, {"name": "cf18", "type": "string"}, {"name":
+    "cf19", "type": "string"}, {"name": "cf20", "type": "string"}, {"name": "cf21",
+    "type": "string"}, {"name": "cf22", "type": "string"}, {"name": "cf23", "type":
+    "string"}, {"name": "cf24", "type": "string"}, {"name": "cf25", "type": "string"},
+    {"name": "cf26", "type": "string"}, {"name": "day_number", "type": "string"}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "int64", "shape": [-1]}}]'
+utc_time_created: '2023-04-23 13:51:09.113918'

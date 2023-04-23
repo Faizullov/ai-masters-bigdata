@@ -1,0 +1,15 @@
+artifact_uri: file:///home/users/Faizullov/ai-masters-bigdata/projects/5mla/mlruns/0/d16aad1a77ce4361b923f70033333192/artifacts
+end_time: 1682257879131
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: d16aad1a77ce4361b923f70033333192
+run_name: I_LOVE_BIGDATA
+run_uuid: d16aad1a77ce4361b923f70033333192
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1682257860593
+status: 3
+tags: []
+user_id: Faizullov
