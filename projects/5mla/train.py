@@ -115,6 +115,6 @@ with mlflow.start_run(run_name="I_LOVE_BIGDATA"):
     # logging.info(f"model score: {model_score:.3f}")
 
     mlflow.log_param("model_param1", sys.argv[2])
-    mlflow.sklearn.log_model(model, artifact_path="models")
+    mlflow.sklearn.log_model(model, artifact_path="model")
     mlflow.log_metric("log_loss", model_score)
 
