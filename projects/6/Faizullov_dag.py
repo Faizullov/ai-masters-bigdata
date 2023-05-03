@@ -4,7 +4,7 @@ import os
 from textwrap import dedent
 from airflow.operators.bash import BashOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from datetime import datetime
+
 import pendulum
 
 # The DAG object; we'll need this to instantiate a DAG
@@ -36,7 +36,7 @@ with DAG(
     default_args={'retries': 2},
     description='ETL DAG hw6',
     schedule_interval=None,
-    start_date=datetime.today().strftime('%Y-%m-%d'),
+    start_date=pendulum.datetime(2023, 1, 3, tz="UTC"),
     catchup=False
 ) as dag:
     
