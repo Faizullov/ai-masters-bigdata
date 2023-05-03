@@ -79,7 +79,7 @@ with DAG(
 
     # Featur eng
     feature_eng_test_task = SparkSubmitOperator(
-          application=f"{base_dir}/feature_eng_test_task.py",
+          application=f"{base_dir}/feature_eng_task.py",
           application_args=["--path-in", TEST_PATH, "--path-out", TEST_PATH_OUT],
           task_id="feature_eng_test_task",
           spark_binary="/usr/bin/spark3-submit",
