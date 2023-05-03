@@ -60,7 +60,7 @@ with DAG(
     #TODO workdir?
     train_task = BashOperator(
          task_id='train_task',
-         bash_command=f'{dsenv} {base_dir}/train.py --train-in {base_dir}/{TRAIN_PATH_OUT}_local --sklearn-model-out {base_dir}/6.joblib'
+         bash_command=f'{dsenv} {base_dir}/train_task.py --train-in {base_dir}/{TRAIN_PATH_OUT}_local --sklearn-model-out {base_dir}/6.joblib'
     )
 
     #
