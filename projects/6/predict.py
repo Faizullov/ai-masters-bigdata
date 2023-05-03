@@ -34,7 +34,7 @@ from sklearn.linear_model import LogisticRegression
 import pandas as pd
 from joblib import load
 
-df = pd.read_json(args.test_in).fillna( {"reviewText": "missingreview"})
+df = spark.read.json(args.test_in).fillna( {"reviewText": "missingreview"})
 
 from pyspark.sql import functions as F
 
