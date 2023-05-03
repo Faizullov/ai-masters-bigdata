@@ -36,7 +36,7 @@ import pandas as pd
 from joblib import dump
 
 model = make_pipeline(
-    HashingVectorizer(n_features=220),
+    HashingVectorizer(n_features=150),
     LogisticRegression()
 )
 
