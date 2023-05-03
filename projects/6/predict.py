@@ -52,4 +52,4 @@ def predict(*cols):
     return pd.Series(predictions)
 
 df = df.withColumn("predictions", predict('reviewText'))
-df.select("id", "predictions").write.csv(args.pred_out)
+df.select("id", "predictions").write.mode("overwrite").csv(args.pred_out)
