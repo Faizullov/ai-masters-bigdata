@@ -33,7 +33,7 @@ with DAG(
     'Faizullov_dag',
     # These args will get passed on to each operator
     # You can override them on a per-task basis during operator initialization
-    default_args={'retries': 2},
+    default_args={'retries': 0},
     description='ETL DAG hw6',
     schedule_interval=None,
     start_date=pendulum.datetime(2023, 1, 3, tz="UTC"),

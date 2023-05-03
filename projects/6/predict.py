@@ -51,5 +51,5 @@ def predict(*cols):
     # Return Pandas Series of predictions.
     return pd.Series(predictions)
 
-df = df.withColumn("predictions", predict(*df.columns))
+df = df.withColumn("predictions", predict('reviewText'))
 df.select("id", "predictions").write.csv(args.pred_out)
