@@ -2,14 +2,13 @@ import os
 import sys
 import argparse
 
+parser = argparse.ArgumentParser()
 
-# Construct the argument parser
-ap = argparse.ArgumentParser()
+parser.add_argument("--train-in", dest="train_in", type=str)
+parser.add_argument("--sklearn-model-out", dest="sklearn_model_out", type=str)
 
-# Add the arguments to the parser
-ap.add_argument("--train-in", required=True)
-ap.add_argument("--sklearn-model-out", required=True)
-args = vars(ap.parse_args())
+args = parser.parse_args()
+
 
 SPARK_HOME = "/usr/lib/spark3"
 PYSPARK_PYTHON = "/opt/conda/envs/dsenv/bin/python"
@@ -41,8 +40,8 @@ model = make_pipeline(
     LogisticRegression()
 )
 
-table_df = pd.read_json(args['train-in'], lines=True)
+table_df = pd.read_json(args.train_in, lines=True)
 
 models = model.fit(table_df['reviewText'], table_df['label'])
 
-dump(models, args['sklearn-model-out'])
+dump(models, args.sklearn_model_out)

@@ -2,15 +2,13 @@ import os
 import sys
 import argparse
 
+parser = argparse.ArgumentParser()
 
-# Construct the argument parser
-ap = argparse.ArgumentParser()
+parser.add_argument("--pred-out", dest="pred_out", type=str)
+parser.add_argument("--test-in", dest="test_in", type=str)
+parser.add_argument("--sklearn-model-in", dest="sklearn_model_in", type=str)
 
-# Add the arguments to the parser
-ap.add_argument("--test-in", required=True)
-ap.add_argument("--pred-out", required=True)
-ap.add_argument("--sklearn-model-in", required=True)
-args = vars(ap.parse_args())
+args = parser.parse_args()
 
 SPARK_HOME = "/usr/lib/spark3"
 PYSPARK_PYTHON = "/opt/conda/envs/dsenv/bin/python"
@@ -36,11 +34,11 @@ from sklearn.linear_model import LogisticRegression
 import pandas as pd
 from joblib import load
 
-df = pd.read_json(args['test_in']).fillna( {"reviewText": "missingreview"})
+df = pd.read_json(args.test_in).fillna( {"reviewText": "missingreview"})
 
 from pyspark.sql import functions as F
 
-models = load(args['sklearn-model-in'])
+models = load(args.sklearn_model_in)
 
 clf = spark.sparkContext.broadcast(models)
 
@@ -54,4 +52,4 @@ def predict(*cols):
     return pd.Series(predictions)
 
 df = df.withColumn("predictions", predict(*df.columns))
-df.select("id", "predictions").write.csv(args['pred-out'])
+df.select("id", "predictions").write.csv(args.pred_out)
