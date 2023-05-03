@@ -36,7 +36,7 @@ with DAG(
     default_args={'retries': 2},
     description='ETL DAG hw6',
     schedule_interval=None,
-    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
+    start_date=datetime.today().strftime('%Y-%m-%d'),
     catchup=False
 ) as dag:
     
