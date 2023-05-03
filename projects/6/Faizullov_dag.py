@@ -4,7 +4,7 @@ import os
 from textwrap import dedent
 from airflow.operators.bash import BashOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-
+from datetime import datetime
 import pendulum
 
 # The DAG object; we'll need this to instantiate a DAG
